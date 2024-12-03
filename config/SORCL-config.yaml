@@ -1,0 +1,47 @@
+data_root: ./dataset/deezer
+results_root: ./model_output/deezer/SORCL
+
+epochs: 200
+use_validation_for_early_stop: 1
+val_freq: 1
+key_score_metric: r10
+convergence_threshold: 30
+val_method: one_pos_whole_graph
+val_batch_size: 256
+file_val_set: ./dataset/deezer/val.pkl
+
+test_method: multi_pos_whole_graph
+test_batch_size: 256
+file_test_set: ./dataset/deezer/test.pkl
+Dataset_type: NodeListDataset
+num_workers: 1
+NodeListDataset_type: LinkDataset
+pos_sampler: ObservedEdges_Sampler
+neg_sampler: RandomNeg_Sampler
+num_neg: 256
+BatchSampleIndicesGenerator_type: SampleIndicesWithReplacement
+train_batch_size: 1024
+str_num_total_samples: num_edges
+epoch_sample_ratio: 0.1
+
+model: SORCL
+seed: 0
+device: cuda:0
+
+neg_weight: 256
+train_num_layer_sample: '[]'
+emb_dim: 64
+emb_init_std: 0.1
+emb_lr: 0.002
+use_sparse: 0
+freeze_emb: 0
+from_pretrained: 0
+margin: 0.9
+theta: 0.5
+L2_reg_weight: 1.0e-06
+use_uniform_weight: 1
+tail_k: 10
+eta: 0.01
+eta2: 0.01
+D_lamda: 0.005
+D_lr: 0.001
