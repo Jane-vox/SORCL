@@ -40,7 +40,6 @@ class Discriminator(torch.nn.Module):
 
 
 def split_nodes(degrees, k):
-    # 划分头节点和尾节点
     degrees = degrees.cpu().numpy()
     head = np.where(degrees >= k)[0]
     tail = np.where(degrees < k)[0]
@@ -52,22 +51,16 @@ def split_nodes(degrees, k):
 
 def link_dropout(src, dst, head, tail, k=5):
     assert len(src) == len(dst), "src and dst must have the same length"
-
-    # 随机保留多少条边
     num_links = np.random.randint(k, size=len(np.unique(src)))
     num_links += 1
-
     src_t = []
     dst_t = []
-
     head = np.array(head)
     tail = np.array(tail)
-
-    # head节点删边
     for i in range(len(head)):
         node = head[i]
-        indices = np.where(src == node)[0]  # head内节点的边的src
-        links = dst[indices]   # 边对应的dst
+        indices = np.where(src == node)[0]  
+        links = dst[indices]  
         if len(links) > 0:
             num_to_keep = min(num_links[head[i]], len(links))
             chosen_indices = np.random.choice(len(links), num_to_keep, replace=False)
@@ -77,11 +70,10 @@ def link_dropout(src, dst, head, tail, k=5):
                 src_t.append(links[idx])
                 dst_t.append(node)
 
-    # 尾节点的边保留
     for i in range(len(tail)):
         node = tail[i]
-        indices = np.where(src == node)[0]  # head内节点的边的src
-        links = dst[indices]   # 边对应的dst
+        indices = np.where(src == node)[0] 
+        links = dst[indices]   
         for j in range(len(links)):
             src_t.append(node)
             dst_t.append(links[j])
@@ -95,25 +87,16 @@ def link_dropout(src, dst, head, tail, k=5):
 
 
 def neighbors(fringe, A, outgoing=True):
-    # Find all 1-hop neighbors of nodes in fringe from graph A,
-    # where A is a scipy csr adjacency matrix.
-    # If outgoing=True, find neighbors with outgoing edges;
-    # otherwise, find neighbors with incoming edges (you should
-    # provide a csc matrix in this case).
     if outgoing:
         res = set(A[list(fringe)].indices)
     else:
         res = set(A[:, list(fringe)].indices)
-
     return res
 
 
-# Extract the k-hop enclosing subgraph around link (src, dst) from A.
 def k_hop_subgraph(src, dst, num_hops, A, sample_ratio=1.0,
                    max_nodes_per_hop=None, node_features=None,
                    y=1, directed=False, A_csc=None):
-
-    random.seed(2024)
     nodes = [src.tolist(), dst.tolist()]
     dists = [0, 0]
     visited = set(nodes)
@@ -125,7 +108,7 @@ def k_hop_subgraph(src, dst, num_hops, A, sample_ratio=1.0,
             out_neighbors = neighbors(fringe, A)
             in_neighbors = neighbors(fringe, A_csc, False)
             fringe = out_neighbors.union(in_neighbors)
-        fringe = fringe - visited  # 子图的边缘节点
+        fringe = fringe - visited  
         visited = visited.union(fringe)
         if sample_ratio < 1.0:
             fringe = random.sample(fringe, int(sample_ratio*len(fringe)))
@@ -135,10 +118,9 @@ def k_hop_subgraph(src, dst, num_hops, A, sample_ratio=1.0,
         if len(fringe) == 0:
             break
         nodes = nodes + list(fringe)
-        dists = dists + [dist] * len(fringe)  # 两个列表合并
+        dists = dists + [dist] * len(fringe) 
     subgraph = A[nodes, :][:, nodes]
 
-    # Remove target link between the subgraph.
     subgraph[0, 1] = 0
     subgraph[1, 0] = 0
 
@@ -149,8 +131,6 @@ def k_hop_subgraph(src, dst, num_hops, A, sample_ratio=1.0,
 
 
 def de_node_labeling(adj, src, dst, max_dist=3):
-    # Distance Encoding. See "Li et. al., Distance Encoding: Design Provably More
-    # Powerful Neural Networks for Graph Representation Learning."
     src, dst = (dst, src) if src > dst else (src, dst)
 
     dist = shortest_path(adj, directed=False, unweighted=True, indices=[src])
