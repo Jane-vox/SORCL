@@ -1,4 +1,4 @@
-# SORCL
+# SORCL: Social-Reachability-driven Contrastive Learning for Friend Recommendation
 
 ## Datasets
 We use Twitch, Deezer and Last.FM for evaluation. 
