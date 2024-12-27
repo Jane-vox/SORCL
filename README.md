@@ -11,7 +11,8 @@ Last.FM | 7,624 | 27,806 | 9.56e-4
 
 Each dataset is composed of 5 files:
 * `info.yaml`: training set information
-* `indices.pkl`,`indptr.pkl`: training set
+* `indices.pkl`: CSR format index array of the training set
+* `indptr.pkl`: CSR format index pointer array of the training set
 * `val.pkl`: validating set
 * `test.pkl`: testing set
 
